@@ -70,7 +70,7 @@ def home():
 def test(request: QueryRequest):
     user_query = request.query.lower().strip()
     if(user_query in greetings):
-        return {"response": greetings[user_query]}
+        return greetings[user_query]
     else:
         query_embedding = embedding_model.encode([user_query]).astype(np.float32)
         D, I = index.search(query_embedding, 1)  # Retrieve closest match
@@ -83,7 +83,7 @@ def test(request: QueryRequest):
             best_match_answer = stored_responses[best_match_query]
         else:
             best_match_answer = "I couldn't find relevant information."
-        return {"response": best_match_answer}
+        return  best_match_answer
 @app.post("/chat/")
 def chat(request: QueryRequest):
     user_query = request.query.lower().strip()
