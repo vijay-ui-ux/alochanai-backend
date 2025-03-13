@@ -8,6 +8,7 @@ from pydantic import BaseModel
 import ollama
 from sentence_transformers import SentenceTransformer
 import numpy as np
+from transformers import pipeline
 import faiss
 import torch
 
@@ -23,6 +24,10 @@ app.add_middleware(
 )
 # Force Torch to use CPU
 torch.device("cpu")
+# Load GPT-2 Model
+gpt_generator = pipeline("text-generation", model="gpt2")
+
+# Test Prompt
 
 async def generate_response_stream(prompt: str):
     response = ollama.chat(model="llama3", messages=[{"role": "user", "content": prompt}], stream=True)
@@ -119,7 +124,9 @@ def chat(request: QueryRequest):
     
     # if len(conversation_history) > 10:
     #     conversation_history.pop(0)  # Keep the history limited to the last 10 interactions
-        return StreamingResponse(generate_response_stream(user_query), media_type="text/event-stream")
+        gpt_response = gpt_generator(user_query, max_length=50)
+        return StreamingResponse(gpt_response, media_type="text/event-stream")
+        # return StreamingResponse(generate_response_stream(user_query), media_type="text/event-stream")
 
     # return {"response": bot_response}
 
