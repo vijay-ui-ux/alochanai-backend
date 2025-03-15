@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-import ollama
+# import ollama
 from sentence_transformers import SentenceTransformer
 import numpy as np
 from transformers import pipeline
@@ -29,10 +29,10 @@ gpt_generator = pipeline("text-generation", model="gpt2")
 
 # Test Prompt
 
-async def generate_response_stream(prompt: str):
-    response = ollama.chat(model="llama3", messages=[{"role": "user", "content": prompt}], stream=True)
-    for chunk in response:
-        yield chunk["message"]["content"]  # Stream chunks of the message
+# async def generate_response_stream(prompt: str):
+#     response = ollama.chat(model="llama3", messages=[{"role": "user", "content": prompt}], stream=True)
+#     for chunk in response:
+#         yield chunk["message"]["content"]  # Stream chunks of the message
 
 # Load dataset from JSON file
 def load_dataset(filepath):
@@ -97,7 +97,9 @@ def chat(request: QueryRequest):
     # Check for greetings first
     if user_query in greetings:
         # bot_response = greetings[user_query]
-        return StreamingResponse(generate_response_stream(user_query), media_type="text/event-stream")
+        gpt_response = gpt_generator(user_query, max_length=50)
+        return StreamingResponse(gpt_response, media_type="text/event-stream")
+        # return StreamingResponse(generate_response_stream(user_query), media_type="text/event-stream")
     else:
         # Convert user query to embedding
         query_embedding = embedding_model.encode([user_query]).astype(np.float32)
