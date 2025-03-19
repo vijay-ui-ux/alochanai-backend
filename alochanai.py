@@ -41,9 +41,13 @@ data = load_dataset("ancient_history.json")
 # Prepare stored questions and responses
 stored_questions = []
 stored_responses = {}
-for dataset in ["teulugu_transliterated_pairs","greeting_pairs", "qa_pairs", "alochanai_pairs"]:
-    stored_questions.extend([item["question"] for item in data[dataset]])
-    stored_responses.update({item["question"]: item["answer"] for item in data[dataset]})
+for dataset in ["teulugu_transliterated_pairs","greeting_pairs", "qa_pairs", "alochanai_pairs", "ancient_pairs"]:
+    if(dataset == "ancient_pairs"):
+        stored_questions.extend([item["instruction"] for item in data[dataset]])
+        stored_responses.update({item["instruction"]: item["output"] for item in data[dataset]})
+    else:
+        stored_questions.extend([item["question"] for item in data[dataset]])
+        stored_responses.update({item["question"]: item["answer"] for item in data[dataset]})
 
 # Encode stored questions into vectors
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
