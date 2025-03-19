@@ -41,7 +41,7 @@ data = load_dataset("ancient_history.json")
 # Prepare stored questions and responses
 stored_questions = []
 stored_responses = {}
-for dataset in ["teulugu_transliterated_pairs","greeting_pairs", "qa_pairs"]:
+for dataset in ["teulugu_transliterated_pairs","greeting_pairs", "qa_pairs", "alochanai_pairs"]:
     stored_questions.extend([item["question"] for item in data[dataset]])
     stored_responses.update({item["question"]: item["answer"] for item in data[dataset]})
 
