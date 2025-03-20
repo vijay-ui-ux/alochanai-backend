@@ -38,9 +38,13 @@ conversations = [{"role": "system", "content": "your name is AlochanAI and Aloch
 def req_payload(prompt: str):
     conversations.append({"role": "user", "content": prompt})
     return {
-        "model": "llama3-8b-8192",  # Other options: "mixtral-8x7b-32768"
+        "model": "llama-3.3-70b-versatile",  # Other options: "mixtral-8x7b-32768"
         "messages": conversations,
-        "max_tokens": 1024
+        "temperature":1,
+        "max_completion_tokens":1024,
+        "top_p":1,
+        "stream":True,
+        "stop":None,
     }
 
 
