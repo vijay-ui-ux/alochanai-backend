@@ -34,12 +34,13 @@ headers = {
     "Authorization": f"Bearer {API_KEY}",
     "Content-Type": "application/json"
 }
-
+conversations = [{"role": "system", "content": "your name is AlochanAI and AlochanAI created you"}]
 # Request Payload
 def req_payload(prompt: str):
+    conversations.append({"role": "user", "content": prompt})
     return {
         "model": "llama3-8b-8192",  # Other options: "mixtral-8x7b-32768"
-        "messages": [{"role": "user", "content": prompt}],
+        "messages": conversations,
         "max_tokens": 100
     }
 
