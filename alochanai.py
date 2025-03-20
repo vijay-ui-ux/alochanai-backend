@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+import requests
 import ollama
 from sentence_transformers import SentenceTransformer, util
 import numpy as np
@@ -23,6 +24,25 @@ app.add_middleware(
 )
 # Force Torch to use CPU
 torch.device("cpu")
+
+# API Endpoint
+url = "https://api.groq.com/openai/v1/chat/completions"
+
+API_KEY = "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"
+# Request Headers
+headers = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+# Request Payload
+def req_payload(prompt: str):
+    return {
+        "model": "llama3-8b-8192",  # Other options: "mixtral-8x7b-32768"
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 100
+    }
+
 
 async def generate_response_stream(prompt: str):
     response = ollama.chat(model="llama3", messages=[{"role": "user", "content": prompt}], stream=True)
@@ -73,29 +93,32 @@ def home():
 @app.post("/test/")
 def test(request: QueryRequest):
     user_query = request.query.lower().strip()
-    if(user_query in greetings):
-        return greetings[user_query]
-    else:
-        query_embedding = embedding_model.encode([user_query]).astype(np.float32)
-        D, I = index.search(query_embedding, 1)  # Retrieve closest match
+    response = requests.post(url, json=req_payload(user_query), headers=headers)
+    return StreamingResponse(response.json()["choices"][0]["message"]["content"], media_type="text/event-stream")
+    # if(user_query in greetings):
+    #     return greetings[user_query]
+    # else:
+    #     query_embedding = embedding_model.encode([user_query]).astype(np.float32)
+    #     D, I = index.search(query_embedding, 1)  # Retrieve closest match
        
-        best_index = I[0][0]
-        best_score = D[0][0]
-        similarity_scores = util.pytorch_cos_sim(query_embedding, question_embeddings)[0].numpy()
-        max_score = np.max(similarity_scores)
-        if max_score < 0.5:
-            return "I couldn't find relevant information."
-        if best_score < 10:  # Lower distance means better match
-            best_match_query = stored_questions[best_index]
-            best_match_answer = stored_responses[best_match_query]
-        else:
-            best_match_answer = "I couldn't find relevant information."
-        return  best_match_answer
+    #     best_index = I[0][0]
+    #     best_score = D[0][0]
+    #     similarity_scores = util.pytorch_cos_sim(query_embedding, question_embeddings)[0].numpy()
+    #     max_score = np.max(similarity_scores)
+    #     if max_score < 0.5:
+    #         return "I couldn't find relevant information."
+    #     if best_score < 10:  # Lower distance means better match
+    #         best_match_query = stored_questions[best_index]
+    #         best_match_answer = stored_responses[best_match_query]
+    #     else:
+    #         best_match_answer = "I couldn't find relevant information."
+    #     return  best_match_answer
 @app.post("/chat/")
 def chat(request: QueryRequest):
     user_query = request.query.lower().strip()
     conversation_history.append({"user": user_query})
-    return StreamingResponse(generate_response_stream(user_query), media_type="text/event-stream")
+    response = requests.post(url, json=req_payload(user_query), headers=headers)
+    return StreamingResponse(response.json()["choices"][0]["message"]["content"], media_type="text/event-stream")
     # return gpt_response[0]['generated_text']
     
     # # Check for greetings first
