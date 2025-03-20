@@ -94,7 +94,7 @@ def home():
 def test(request: QueryRequest):
     user_query = request.query.lower().strip()
     response = requests.post(url, json=req_payload(user_query), headers=headers)
-    return StreamingResponse(response.json()["choices"][0]["message"]["content"], media_type="text/event-stream")
+    return response.json()["choices"][0]["message"]["content"]
     # if(user_query in greetings):
     #     return greetings[user_query]
     # else:
