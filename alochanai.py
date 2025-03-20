@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import ollama
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer, util
 import numpy as np
 import faiss
 import torch
@@ -81,7 +81,10 @@ def test(request: QueryRequest):
        
         best_index = I[0][0]
         best_score = D[0][0]
-        
+        similarity_scores = util.pytorch_cos_sim(query_embedding, question_embeddings)[0].numpy()
+        max_score = np.max(similarity_scores)
+        if max_score < 0.5:
+            return "I couldn't find relevant information."
         if best_score < 10:  # Lower distance means better match
             best_match_query = stored_questions[best_index]
             best_match_answer = stored_responses[best_match_query]
