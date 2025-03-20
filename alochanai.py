@@ -45,11 +45,6 @@ def req_payload(prompt: str):
     }
 
 
-async def generate_response_stream(prompt: str):
-    response = ollama.chat(model="llama3", messages=[{"role": "user", "content": prompt}], stream=True)
-    for chunk in response:
-        yield chunk["message"]["content"]  # Stream chunks of the message
-
 # Load dataset from JSON file
 def load_dataset(filepath):
     if os.path.exists(filepath):
@@ -95,6 +90,8 @@ def home():
 def test(request: QueryRequest):
     user_query = request.query.lower().strip()
     response = requests.post(url, json=req_payload(user_query), headers=headers)
+    if response.json()["choices"][0]["message"]["content"] == None or response.json()["choices"][0]["message"]["content"] == "":
+        return "I couldn't find relevant information."
     return response.json()["choices"][0]["message"]["content"]
     # if(user_query in greetings):
     #     return greetings[user_query]
