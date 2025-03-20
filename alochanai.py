@@ -6,7 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import requests
-import ollama
 from sentence_transformers import SentenceTransformer, util
 import numpy as np
 import faiss
