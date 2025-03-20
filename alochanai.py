@@ -118,7 +118,7 @@ def chat(request: QueryRequest):
     user_query = request.query.lower().strip()
     conversation_history.append({"user": user_query})
     response = requests.post(url, json=req_payload(user_query), headers=headers)
-    return StreamingResponse(response.json()["choices"][0]["message"]["content"], media_type="text/event-stream")
+    return response.json()["choices"][0]["message"]["content"]
     # return gpt_response[0]['generated_text']
     
     # # Check for greetings first
