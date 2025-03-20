@@ -41,7 +41,7 @@ def req_payload(prompt: str):
     return {
         "model": "llama3-8b-8192",  # Other options: "mixtral-8x7b-32768"
         "messages": conversations,
-        "max_tokens": 100
+        "max_tokens": 1024
     }
 
 
